@@ -1,0 +1,28 @@
+---
+name: Action
+"on":
+  push:
+
+jobs:
+  action:
+    runs-on: ubuntu-latest
+    services:
+      nginx:
+        image: nginx
+        ports:
+          - 8080:80
+        volumes:
+          - /data:/usr/share/nginx
+
+    steps:
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: /data
+          key: test-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            test-${{ runner.os }}
+
+      - run: |
+          echo "Hi from Action! cached: ${{ steps.cache.outputs.cache-hit }}" \
+            > /data/index.html
