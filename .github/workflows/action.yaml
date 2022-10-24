@@ -3,6 +3,8 @@ name: Action
 "on":
   push:
 
+env:
+  DATA_DIR: /var/run/datadir
 jobs:
   action:
     runs-on: ubuntu-latest
@@ -12,7 +14,7 @@ jobs:
         ports:
           - 8080:80
         volumes:
-          - /data:/usr/share/nginx
+          - /var/run/datadir:/usr/share/nginx
 
     steps:
       - uses: actions/cache@v3
@@ -24,5 +26,10 @@ jobs:
             test-${{ runner.os }}
 
       - run: |
+          cat /etc/passwd
+          id "$(whoami)"
+          cat /etc/sub{uid,gid}
+          sudo ls -la ${{ env.DATA_DIR }}
           echo "Hi from Action! cached: ${{ steps.cache.outputs.cache-hit }}" \
-            > /data/index.html
+            | sudo tee ${{ env.DATA_DIR }}/index.html
+          curl localhost:8080
